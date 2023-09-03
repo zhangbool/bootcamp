@@ -3,21 +3,33 @@ import { createStyles, makeStyles } from "@material-ui/core/styles";
 import { baseColor } from "../utils/color";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 
-const placeHolderImges = new Array(20).fill({});
+const placeHolderImges = new Array(12).fill({});
+
+// 这个是图集图片展示的类
 const Gallary = (props: any) => {
   const isMobile = !useMediaQuery("(min-width:1000px)");
   const useStyles = makeStyles((theme) =>
     createStyles({
       root: {
-        display: isMobile ? "block:" : "flex",
-        justifyContent: "flex-start",
-        alignItems: "center",
-        flexWrap: "wrap",
+        // display: isMobile ? "block:" : "flex",
+        // justifyContent: "flex-start",
+        // alignItems: "center",
+        // flexWrap: "wrap",
+        // backgroundColor: "white"
       },
       title: {
         marginTop: "20px",
         fontSize: "20px",
       },
+      boxContainer:{
+        display: "flex",
+        width: "100%",
+        height: "316px",
+          // backgroundColor: "lightgray",
+          margin: "5px"
+        // height: "auto"
+      },
+
       imageContainer: {
         position: "relative",
         flex: isMobile ? 1 : "0 0 21%",
@@ -27,9 +39,10 @@ const Gallary = (props: any) => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        fontSize: "50px",
-        width: isMobile ? "100%" : "auto",
-        height: isMobile ? "0" : "auto",
+        // width: isMobile ? "100%" : "auto",
+        // height: isMobile ? "0" : "auto",
+        // width: "228px",
+        // height: "316px",
       },
       child: {
         width: "100%",
@@ -43,6 +56,9 @@ const Gallary = (props: any) => {
         alignItems: "center",
         color: "#60606F",
         fontSize: "8vw",
+      },
+      desc:{
+        marginTop: "20px",
       },
       distant: {
         fontSize: "1vw",
@@ -63,6 +79,7 @@ const Gallary = (props: any) => {
       },
     })
   );
+  // images是图片集合
   const { images = [], onClick } = props;
   const classes = useStyles({});
   const [hovered, setHovered]: any = useState();
@@ -73,38 +90,52 @@ const Gallary = (props: any) => {
   const onMouseLeave = () => {
     setHovered(null);
   };
+
   return (
     <div className={classes.root}>
       {images.length > 0
         ? images.map((img: any, index: number) => {
-            const { src, distance } = img;
+            const { src, distance, goodsId, imgUrl, imgColor, goodsName, goodsUrl } = img;
             const isHovered = hovered === src;
             return (
-              <div
-                className={classes.imageContainer}
-                onClick={() => {
-                  onClick(index);
-                }}
-                onMouseOver={onMouseOver}
-                onMouseLeave={onMouseLeave}
-                key={src}
-                data-src={src}
-                style={{
-                  border: `solid 2px ${isHovered ? baseColor : "transparent"}`,
-                }}
-              >
-                <img src={src} className={classes.child} alt="" />
-                {isHovered && (
-                  <p className={classes.distant}>{distance.toFixed(6)}</p>
-                )}
-              </div>
+                <div className={classes.boxContainer} key={index}>
+                  <div
+                      className={classes.imageContainer}
+                      onClick={() => {
+                        onClick(index);
+                      }}
+                      onMouseOver={onMouseOver}
+                      onMouseLeave={onMouseLeave}
+                      key={src}
+                      data-src={src}
+                      style={{
+                        border: `solid 2px ${isHovered ? baseColor : "transparent"}`,
+                      }}
+                  >
+                    <img src={src} className={classes.child} alt="aaa" />
+                    {isHovered && (
+                        <p className={classes.distant}>{distance.toFixed(6)}</p>
+                    )}
+                  </div>
+                  <div className={classes.desc} style={{"color":"white"}}>
+                      {/*<div>{src}</div>*/}
+                      <div>similarity: {distance.toFixed(5)}</div>
+                      <div>goodsId: {goodsId}</div>
+                      <div>color: {imgColor}</div>
+                      <div>goodsName: {goodsName}</div>
+                      <div><a href={goodsUrl} style={{"color":"white"}} target="_blank">redirect to detail page</a></div>
+                      {/*<div><a href={imgUrl} style={{"color":"white"}}  target="_blank">redirect to original image</a></div>*/}
+                  </div>
+                </div>
             );
           })
-        : placeHolderImges.map((item: any, index: number) => (
+        : /*placeHolderImges.map((item: any, index: number) => (
             <div className={classes.imageContainer} key={index}>
               <p className={classes.child}>{index < 12 ? index + 1 : ""}</p>
             </div>
-          ))}
+          ))*/
+          <div style={{"color":"white"}}>no original image specified</div>
+      }
     </div>
   );
 };

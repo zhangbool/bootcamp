@@ -12,7 +12,8 @@ const App: React.FC = () => {
       root: {
         flexGrow: 1,
         display: isMobile ? "block" : "flex",
-        overflow: isMobile ? "visible" : "hidden",
+        // display: "block",
+        // overflow: "visible"
       },
     });
   });
@@ -22,8 +23,13 @@ const App: React.FC = () => {
   return (
     <QueryProvider>
       <div className={classes.root}>
+
+        {/*设置部分*/}
         <Setting setImages={setImages} setLoading={setLoading} />
+
+        {/*搜索结果部分*/}
         <SearchResults images={images} />
+
         {loading && (
           <div
             style={{
@@ -37,6 +43,7 @@ const App: React.FC = () => {
             }}
           ></div>
         )}
+
       </div>
     </QueryProvider>
   );

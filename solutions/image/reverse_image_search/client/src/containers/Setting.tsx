@@ -14,17 +14,19 @@ import Logo from "./Logo.svg";
 import { delayRunFunc } from "../utils/Helper";
 
 const Setting = (props: any) => {
+
   const isMobile = !useMediaQuery("(min-width:1000px)");
+
   const useStyles = makeStyles((theme: Theme) => {
     return createStyles({
       setting: {
         display: "flex",
         flexDirection: "column",
-        minWidth: isMobile ? "90%" : "300px",
+        minWidth: isMobile ? "90%" : "250px",
         padding: "60px 20px",
         borderWidth: "1px",
         backgroundColor: "#1F2023",
-        color: "#E4E4E6",
+        color: "#FFFFFF",
         overflowY: "auto",
       },
       header: {
@@ -121,8 +123,9 @@ const Setting = (props: any) => {
         alignItems: "center",
       },
       benchImage: {
-        width: "400px",
-        height: "250px",
+        // 图片尺寸好像都是一样的
+        width: "228px",
+        height: "316px",
         position: "relative",
       },
       dropzoneContainer: {
@@ -152,7 +155,8 @@ const Setting = (props: any) => {
       },
     });
   });
-  const { process, train, count, search, clearAll } = useContext(queryContext);
+
+  const { process, train, count, search, clearAll, getImageConnectInfo } = useContext(queryContext);
   const { setImages, loading, setLoading } = props;
   const classes = useStyles({});
   const [inputs, setInputs]: any = useState("");
@@ -178,19 +182,81 @@ const Setting = (props: any) => {
     },
     false
   );
+
+  // 这里是search方法吗
   const _search = ({ topK, image }: any) => {
     const fd = new FormData();
     fd.set("topk", topK);
     fd.append("image", image);
+
     search(fd).then((res: any) => {
       const { status, data } = res || {};
       if (status === 200) {
-        setImages(data);
+
+
+        let requestStr = "";
+        // 在这里发送请求通过图片名称获取相关的内容
+        data.forEach((item: any, index: any) => {
+          // console.log( index + " 搜索图片结果是: " + JSON.stringify(item))
+          let name: string = item[0].split("/")[2].split(".")[0]
+          console.log("name是: " + name)
+          requestStr += name + ",";
+        })
+
+        let arr01 = data;
+        const fd = new FormData();
+        fd.set("imgNames", requestStr);
+        // 这里是做http请求吗
+        getImageConnectInfo(fd).then((res: any) => {
+          const { status, data } = res || {};
+          if (status === 200) {
+            // 这里并不能直接一一拼接
+            console.log("结果是: " + JSON.stringify(data));
+            console.log("第一个数组是: " + JSON.stringify(arr01));
+            console.log("第二个数组是: " + JSON.stringify(data));
+            console.log(arr01.length);
+            console.log(data.length);
+
+            for (let i=0;i<arr01.length;i++){
+              let find = false;
+              for (let j = 0; j<data.length; j++) {
+                if (arr01[i][0].split("/")[2].split(".")[0] == data[j].imgName) {
+                  console.log("匹配上了:" + i + "----" + j);
+                  arr01[i][2] = data[j]?data[j].goodsId:"-1";
+                  arr01[i][3] = data[j]?data[j].imgUrl:"-1";
+                  arr01[i][4] = data[j]?data[j].imgColor:"-1";
+                  arr01[i][5] = data[j]?data[j].goodsName:"-1";
+                  find = true;
+                  continue;
+                }
+              }
+
+              if (!find) {
+                console.log("~~~~~没找到~~~~~~")
+                // 如果走到这里, 说明没有找到
+                arr01[i][2] = "-1";
+                arr01[i][3] = "-1";
+                arr01[i][4] = "-1";
+                arr01[i][5] = "-1";
+              }
+            }
+            console.log("组合后的结果是: " + JSON.stringify(arr01));
+            setImages(arr01);
+          } else{
+            console.log("请求失败" + JSON.stringify(data));
+            // 如果失败了, 就只是把图片显示出来, 其他信息不添加了
+            setImages(data);
+          }
+        })
       }
+
+      // setImages(data);
     });
   };
 
+  // 上传原始图片后, 进行搜索
   const uploadImg = (file: any) => {
+    console.log("开始上传图片-------")
     setImage(file);
     reader.readAsDataURL(file);
     _search({ topK, image: file });
@@ -264,71 +330,31 @@ const Setting = (props: any) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // 这里是页面的内容
   return (
     <div className={classes.setting}>
+
       <div className={classes.header}>
-        <img src={Logo} width="150px" alt="logo" />
-        <p>Image Search Demo</p>
+        <p>Azazie Image Search</p>
       </div>
-      <div className={classes.configHead}>
-        <h4 className={classes.config}>Config</h4>
-        <h4 className={classes.clear} onClick={clear}>
-          CLEAR ALL
-        </h4>
-      </div>
-      <SeperatLine title={`IMAGE SET`} style={{ marginBottom: "20px" }} />
+
+      {/*图库图片数量展示*/}
+      <SeperatLine title={`Dataset Info`} style={{ marginBottom: "20px" }} />
       <div className={classes.imageSet}>
         <div className={classes.counts}>
           <p style={{ color: loading ? baseColor : "#fff" }}>{setText}</p>
           <h3 className={classes.currTotal}>{`${current}/${total}`}</h3>
         </div>
-        <div className={classes.setPath}>
-          <TextField
-            classes={{ root: classes.customInput }}
-            label=""
-            variant="outlined"
-            value={inputs}
-            onChange={onInputChange}
-            InputLabelProps={{
-              shrink: true,
-              classes: {
-                root: classes.controlLabel,
-                focused: classes.controlLabel,
-              },
-            }}
-            margin="normal"
-            InputProps={{
-              style: {
-                textAlign: "left",
-                width: isMobile ? "100%" : "340px",
-                height: "40px",
-              },
-              classes: {
-                notchedOutline: classes.notchedOutline,
-                root: classes.formLabel,
-              },
-              placeholder: "path/to/your/images",
-            }}
-          />
-          <Fab
-            classes={{
-              root: classes.customFab,
-              focusVisible: classes.customFab,
-            }}
-          >
-            <AddIcon
-              onClick={uploadImgPath}
-              classes={{ root: classes.customIcon }}
-            />
-          </Fab>
-        </div>
-        <SeperatLine title={`TOP K(1－100)`} style={{ marginBottom: "20px" }} />
-        <div className={classes.counts}>
-          <p>{`show top ${topK} results`}</p>
-        </div>
-        <Slider
+      </div>
+
+      {/*输出多少张图片滑动框*/}
+      <SeperatLine title={`TOP K(1－30)`} style={{ marginBottom: "20px" }} />
+      <div className={classes.counts}>
+        <p>{`show top ${topK} results`}</p>
+      </div>
+      <Slider
           min={1}
-          max={100}
+          max={30}
           value={topK}
           onChange={onTopKChange}
           classes={{
@@ -337,8 +363,9 @@ const Setting = (props: any) => {
             rail: classes.track,
             thumb: classes.thumb,
           }}
-        />
-      </div>
+      />
+
+      {/*图片输入*/}
       <SeperatLine title={`ORIGINAL IMAGE`} style={{ marginBottom: "50px" }} />
       <div className={classes.upload}>
         {image ? (

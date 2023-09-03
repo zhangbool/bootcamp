@@ -1,7 +1,9 @@
 import React, { FC, createContext, ReactNode } from "react";
 import axios from "axios";
 import * as URL from "../utils/Endpoints";
+import {GetImageConnectInfo, GetImageUrl} from "../utils/Endpoints";
 
+// 这里是进行网络请求的
 const axiosInstance = axios.create();
 
 export const queryContext = createContext<any>({});
@@ -33,6 +35,11 @@ const QueryProvider: FC<{ children: ReactNode }> = ({ children }) => {
     return await axiosInstance.post(url).catch(errorParser);
   };
 
+  const getImageConnectInfo = async (params: any) => {
+    const url = URL.GetImageConnectInfo;
+    return await axiosInstance.post(url, params).catch(errorParser);
+  };
+
   return (
     <Provider
       value={{
@@ -40,7 +47,8 @@ const QueryProvider: FC<{ children: ReactNode }> = ({ children }) => {
         count,
         search,
         clearAll,
-        train
+        train,
+        getImageConnectInfo
       }}
     >
       {children}
