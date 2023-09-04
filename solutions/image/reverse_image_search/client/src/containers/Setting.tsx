@@ -160,7 +160,7 @@ const Setting = (props: any) => {
   const { setImages, loading, setLoading } = props;
   const classes = useStyles({});
   const [inputs, setInputs]: any = useState("");
-  const [topK, setTopK]: any = useState(5);
+  const [topK, setTopK]: any = useState(6);
   const [totalNum, setTotalNum]: any = useState(0);
   const [[current, total], setProcessedNum]: any = useState([0, 0]);
   const [image, setImage]: any = useState();
