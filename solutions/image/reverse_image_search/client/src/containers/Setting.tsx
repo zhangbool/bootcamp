@@ -198,7 +198,7 @@ const Setting = (props: any) => {
         // 在这里发送请求通过图片名称获取相关的内容
         data.forEach((item: any, index: any) => {
           // console.log( index + " 搜索图片结果是: " + JSON.stringify(item))
-          let name: string = item[0].split("/")[2].split(".")[0]
+          let name: string = item[0].split("/")[3].split(".")[0]
           console.log("name是: " + name)
           requestStr += name + ",";
         })
